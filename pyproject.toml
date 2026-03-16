@@ -4,15 +4,31 @@ build-backend = "hatchling.build"
 
 [project]
 name = "whoop-write-api"
-version = "0.1.0"
+version = "0.2.0"
 description = "Python client for Whoop API — official read + unofficial write endpoints"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.11"
+authors = [{ name = "jd1207" }]
+keywords = ["whoop", "fitness", "api", "workout", "health"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Typing :: Typed",
+    "Framework :: AsyncIO",
+]
 dependencies = [
     "httpx>=0.27",
-    "python-dotenv>=1.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/jd1207/whoop-write-api"
+Issues = "https://github.com/jd1207/whoop-write-api/issues"
 
 [project.optional-dependencies]
 dev = [
@@ -28,3 +44,7 @@ packages = ["src/whoop"]
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
