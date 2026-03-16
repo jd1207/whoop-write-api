@@ -4,9 +4,9 @@ Python client for the Whoop API — both official read endpoints and reverse-eng
 
 ## Why?
 
-The official Whoop API is read-only. This library adds write support so you can programmatically log workouts with full exercise details (sets, reps, weights) to Whoop's Strength Trainer.
+The official Whoop API is read-only. This library adds write support so you can programmatically log any activity — weightlifting with full exercise details, sauna sessions, ice baths, meditation, or any of Whoop's 80+ activity types.
 
-> **Disclaimer:** Write endpoints are reverse-engineered from Whoop's internal API and may break without notice. Read endpoints use the official documented API.
+> **Disclaimer:** Write endpoints are reverse-engineered from Whoop's internal API and may break without notice. Using these endpoints may violate Whoop's Terms of Service and could result in account action. Read endpoints use the official documented API. This project is not affiliated with Whoop.
 
 ## Install
 
@@ -18,7 +18,7 @@ pip install whoop-write-api
 
 ```python
 import asyncio
-from whoop import WhoopClient, WorkoutWrite, ExerciseWrite
+from whoop import WhoopClient, WorkoutWrite, ExerciseWrite, SportType
 
 async def main():
     client = WhoopClient(token="your-bearer-token")
@@ -27,9 +27,9 @@ async def main():
     recoveries = await client.get_recovery()
     print(f"Recovery: {recoveries[0].recovery_score}%")
 
-    # log a workout
+    # log a strength workout
     workout = WorkoutWrite(
-        sport_id=1,  # strength training
+        sport_id=SportType.WEIGHTLIFTING,
         start="2026-03-16T14:00:00.000Z",
         end="2026-03-16T15:00:00.000Z",
         exercises=[
@@ -38,7 +38,16 @@ async def main():
         ],
     )
     result = await client.log_workout(workout)
-    print(f"Logged workout {result['activity_id']}")
+    print(f"Logged workout {result.activity_id}")
+
+    # log a sauna session (no exercises needed)
+    sauna = WorkoutWrite(
+        sport_id=SportType.SAUNA,
+        start="2026-03-16T18:00:00.000Z",
+        end="2026-03-16T18:20:00.000Z",
+    )
+    result = await client.log_workout(sauna)
+    print(f"Logged sauna {result.activity_id}")
 
 asyncio.run(main())
 ```
@@ -77,7 +86,39 @@ All official Whoop API endpoints:
 
 ## Write API (unofficial)
 
-- `client.log_workout(WorkoutWrite)` — creates activity + links exercises
+- `client.log_workout(WorkoutWrite)` — log any activity type, optionally with exercises
+- `client.get_sport_types()` — fetch all available sport types from Whoop
+
+### Sport Types
+
+Use `SportType` for IDE autocomplete or pass raw ints:
+
+```python
+from whoop import SportType
+
+SportType.SAUNA          # 233
+SportType.ICE_BATH       # 88
+SportType.MEDITATION     # 70
+SportType.WEIGHTLIFTING  # 45
+SportType.RUNNING        # 0
+# ... 80+ more
+```
+
+## Roadmap
+
+### v0.3.0 - Write API Expansion
+
+The following features require endpoint discovery via mitmproxy/Charles Proxy
+capture from the Whoop mobile app:
+
+- [ ] Journal entries (daily caffeine, alcohol, supplements, stress ratings)
+- [ ] Body measurement updates (weight, height)
+- [ ] Workout notes and annotations
+- [ ] Workout deletion
+- [ ] `async with` context manager for connection pooling
+- [ ] Synchronous client wrapper
+
+See ENDPOINTS.md for instructions on capturing new endpoints.
 
 ## License
 
