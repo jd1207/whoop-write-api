@@ -130,18 +130,27 @@ class ExerciseWrite:
     weight: float
     weight_unit: str = "lbs"
 
+    def to_dict(self) -> dict:
+        return {
+            "name": self.name,
+            "sets": self.sets,
+            "reps": self.reps,
+            "weight": self.weight,
+            "weight_unit": self.weight_unit,
+        }
+
 
 @dataclass
 class WorkoutWrite:
     sport_id: int
     start: str
     end: str
-    exercises: list[ExerciseWrite]
+    exercises: list[ExerciseWrite] | None = None
 
-    def to_activity_payload(self) -> dict:
+    def to_activity_payload(self, timezone_offset: str = "+0000") -> dict:
         return {
             "gpsEnabled": False,
-            "timezoneOffset": "+0000",
+            "timezoneOffset": timezone_offset,
             "sportId": self.sport_id,
             "source": "user",
             "during": {
@@ -152,13 +161,23 @@ class WorkoutWrite:
         }
 
     def to_exercises_payload(self) -> list[dict]:
-        return [
-            {
-                "name": ex.name,
-                "sets": ex.sets,
-                "reps": ex.reps,
-                "weight": ex.weight,
-                "weight_unit": ex.weight_unit,
-            }
-            for ex in self.exercises
-        ]
+        if not self.exercises:
+            return []
+        return [ex.to_dict() for ex in self.exercises]
+
+
+@dataclass
+class SportTypeInfo:
+    id: int
+    name: str
+
+    @classmethod
+    def from_api(cls, data: dict) -> SportTypeInfo:
+        return cls(id=data["id"], name=data["name"])
+
+
+@dataclass
+class WorkoutResult:
+    activity_id: int
+    exercises_linked: bool
+    error: str | None = None

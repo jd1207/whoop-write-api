@@ -1,4 +1,4 @@
-from whoop.models import Recovery, Sleep, Workout, Cycle, BodyMeasurement
+from whoop.models import Recovery, Sleep, Workout, Cycle, BodyMeasurement, SportTypeInfo, WorkoutResult
 
 def test_recovery_from_api():
     data = {
@@ -43,3 +43,21 @@ def test_sleep_from_api():
     assert sleep.performance == 85.0
     assert sleep.efficiency == 92.0
     assert sleep.total_in_bed_hours == 8.0
+
+def test_sport_type_info_from_api():
+    data = {"id": 233, "name": "Sauna"}
+    info = SportTypeInfo.from_api(data)
+    assert info.id == 233
+    assert info.name == "Sauna"
+
+def test_workout_result_success():
+    result = WorkoutResult(activity_id=42, exercises_linked=True)
+    assert result.activity_id == 42
+    assert result.exercises_linked is True
+    assert result.error is None
+
+def test_workout_result_partial_failure():
+    result = WorkoutResult(activity_id=42, exercises_linked=False, error="link failed")
+    assert result.activity_id == 42
+    assert result.exercises_linked is False
+    assert result.error == "link failed"

@@ -46,4 +46,5 @@ async def test_client_log_workout(mock_api, fake_token):
         ],
     )
     result = await client.log_workout(workout)
-    assert result["activity_id"] == 77
+    assert result.activity_id == 77
+    assert result.exercises_linked is True
