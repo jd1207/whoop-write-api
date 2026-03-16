@@ -4,6 +4,7 @@ from whoop.read import WhoopReadAPI
 from whoop.write import WhoopWriteAPI
 from whoop.models import (
     Recovery, Sleep, Workout, Cycle, BodyMeasurement, WorkoutWrite,
+    WorkoutResult, SportTypeInfo,
 )
 
 
@@ -39,5 +40,8 @@ class WhoopClient:
     async def get_body_measurement(self) -> BodyMeasurement:
         return await self._read.get_body_measurement()
 
-    async def log_workout(self, workout: WorkoutWrite) -> dict:
+    async def log_workout(self, workout: WorkoutWrite) -> WorkoutResult:
         return await self._write.log_workout(workout)
+
+    async def get_sport_types(self) -> list[SportTypeInfo]:
+        return await self._write.get_sport_types()

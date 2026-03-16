@@ -1,7 +1,7 @@
 import pytest
 import httpx
 from whoop.client import WhoopClient
-from whoop.models import WorkoutWrite, ExerciseWrite
+from whoop.models import WorkoutWrite, ExerciseWrite, SportTypeInfo
 
 @pytest.mark.asyncio
 async def test_client_read_recovery(mock_api, fake_token):
@@ -48,3 +48,16 @@ async def test_client_log_workout(mock_api, fake_token):
     result = await client.log_workout(workout)
     assert result.activity_id == 77
     assert result.exercises_linked is True
+
+@pytest.mark.asyncio
+async def test_client_get_sport_types(mock_api, fake_token):
+    mock_api.get("/activities-service/v2/activity-types").mock(
+        return_value=httpx.Response(200, json=[
+            {"id": 233, "name": "Sauna"},
+        ])
+    )
+    client = WhoopClient(token=fake_token)
+    types = await client.get_sport_types()
+    assert len(types) == 1
+    assert isinstance(types[0], SportTypeInfo)
+    assert types[0].name == "Sauna"
