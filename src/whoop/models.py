@@ -120,3 +120,45 @@ class BodyMeasurement:
             weight_kilogram=data["weight_kilogram"],
             max_heart_rate=data["max_heart_rate"],
         )
+
+
+@dataclass
+class ExerciseWrite:
+    name: str
+    sets: int
+    reps: int
+    weight: float
+    weight_unit: str = "lbs"
+
+
+@dataclass
+class WorkoutWrite:
+    sport_id: int
+    start: str
+    end: str
+    exercises: list[ExerciseWrite]
+
+    def to_activity_payload(self) -> dict:
+        return {
+            "gpsEnabled": False,
+            "timezoneOffset": "+0000",
+            "sportId": self.sport_id,
+            "source": "user",
+            "during": {
+                "lower": self.start,
+                "upper": self.end,
+                "bounds": "[)",
+            },
+        }
+
+    def to_exercises_payload(self) -> list[dict]:
+        return [
+            {
+                "name": ex.name,
+                "sets": ex.sets,
+                "reps": ex.reps,
+                "weight": ex.weight,
+                "weight_unit": ex.weight_unit,
+            }
+            for ex in self.exercises
+        ]
