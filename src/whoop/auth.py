@@ -65,7 +65,7 @@ class WhoopAuth:
         self.refresh_token = data["refresh_token"]
         return self.access_token
 
-    async def login_password(self, username: str, password: str) -> str:
+    async def login_password(self, username: str, password: str, client_id: str = "whoop-recruiting-prod") -> str:
         async with httpx.AsyncClient(base_url=LEGACY_BASE) as client:
             resp = await client.post(
                 "/oauth/token",
@@ -73,7 +73,7 @@ class WhoopAuth:
                     "grant_type": "password",
                     "username": username,
                     "password": password,
-                    "client_id": "whoop-recruiting-prod",
+                    "client_id": client_id,
                 },
             )
         if resp.status_code != 200:
