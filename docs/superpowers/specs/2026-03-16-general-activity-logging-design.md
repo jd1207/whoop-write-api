@@ -187,16 +187,7 @@ class WorkoutWrite:
     def to_exercises_payload(self) -> list[dict]:
         if not self.exercises:
             return []
-        return [
-            {
-                "name": ex.name,
-                "sets": ex.sets,
-                "reps": ex.reps,
-                "weight": ex.weight,
-                "weight_unit": ex.weight_unit,
-            }
-            for ex in self.exercises
-        ]
+        return [ex.to_dict() for ex in self.exercises]
 ```
 
 Changes:
