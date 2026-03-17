@@ -1,4 +1,5 @@
 from __future__ import annotations
+import warnings
 import httpx
 from whoop.exceptions import WhoopAuthError
 
@@ -42,7 +43,7 @@ class WhoopAuth:
             raise WhoopAuthError(f"token exchange failed: {resp.text}", status_code=resp.status_code)
         data = resp.json()
         self.access_token = data["access_token"]
-        self.refresh_token = data["refresh_token"]
+        self.refresh_token = data.get("refresh_token")
         return self.access_token
 
     async def refresh(self) -> str:
@@ -62,10 +63,16 @@ class WhoopAuth:
             raise WhoopAuthError(f"token refresh failed: {resp.text}", status_code=resp.status_code)
         data = resp.json()
         self.access_token = data["access_token"]
-        self.refresh_token = data["refresh_token"]
+        self.refresh_token = data.get("refresh_token")
         return self.access_token
 
     async def login_password(self, username: str, password: str, client_id: str = "whoop-recruiting-prod") -> str:
+        warnings.warn(
+            "login_password() uses a legacy endpoint that Whoop has deprecated. "
+            "Use OAuth2 via exchange_code() instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         async with httpx.AsyncClient(base_url=LEGACY_BASE) as client:
             resp = await client.post(
                 "/oauth/token",
