@@ -5,7 +5,7 @@ from whoop.models import WorkoutWrite, ExerciseWrite, SportTypeInfo
 
 @pytest.mark.asyncio
 async def test_client_read_recovery(mock_api, fake_token):
-    mock_api.get("/developer/v1/recovery").mock(
+    mock_api.get("/developer/v2/recovery").mock(
         return_value=httpx.Response(200, json={
             "records": [{
                 "cycle_id": 1, "sleep_id": 2, "user_id": 3,

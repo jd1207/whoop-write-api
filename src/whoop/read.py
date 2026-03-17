@@ -44,21 +44,21 @@ class WhoopReadAPI:
         return all_records
 
     async def get_recovery(self, start: str | None = None, end: str | None = None) -> list[Recovery]:
-        records = await self._get_paginated("/developer/v1/recovery", start, end)
+        records = await self._get_paginated("/developer/v2/recovery", start, end)
         return [Recovery.from_api(r) for r in records]
 
     async def get_sleep(self, start: str | None = None, end: str | None = None) -> list[Sleep]:
-        records = await self._get_paginated("/developer/v1/activity/sleep", start, end)
+        records = await self._get_paginated("/developer/v2/activity/sleep", start, end)
         return [Sleep.from_api(r) for r in records]
 
     async def get_workouts(self, start: str | None = None, end: str | None = None) -> list[Workout]:
-        records = await self._get_paginated("/developer/v1/activity/workout", start, end)
+        records = await self._get_paginated("/developer/v2/activity/workout", start, end)
         return [Workout.from_api(r) for r in records]
 
     async def get_cycles(self, start: str | None = None, end: str | None = None) -> list[Cycle]:
-        records = await self._get_paginated("/developer/v1/cycle", start, end)
+        records = await self._get_paginated("/developer/v2/cycle", start, end)
         return [Cycle.from_api(r) for r in records]
 
     async def get_body_measurement(self) -> BodyMeasurement:
-        data = await self._get("/developer/v1/user/body_measurement")
+        data = await self._get("/developer/v2/user/body_measurement")
         return BodyMeasurement.from_api(data)

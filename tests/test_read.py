@@ -6,7 +6,7 @@ from whoop.exceptions import WhoopRateLimitError
 
 @pytest.mark.asyncio
 async def test_get_recovery(mock_api, fake_token):
-    mock_api.get("/developer/v1/recovery").mock(
+    mock_api.get("/developer/v2/recovery").mock(
         return_value=httpx.Response(200, json={
             "records": [{
                 "cycle_id": 1,
@@ -32,7 +32,7 @@ async def test_get_recovery(mock_api, fake_token):
 
 @pytest.mark.asyncio
 async def test_get_sleep(mock_api, fake_token):
-    mock_api.get("/developer/v1/activity/sleep").mock(
+    mock_api.get("/developer/v2/activity/sleep").mock(
         return_value=httpx.Response(200, json={
             "records": [{
                 "id": 1,
@@ -62,7 +62,7 @@ async def test_get_sleep(mock_api, fake_token):
 
 @pytest.mark.asyncio
 async def test_rate_limit_handling(mock_api, fake_token):
-    mock_api.get("/developer/v1/recovery").mock(
+    mock_api.get("/developer/v2/recovery").mock(
         return_value=httpx.Response(429, headers={"X-RateLimit-Reset": "60"})
     )
     api = WhoopReadAPI(token=fake_token)

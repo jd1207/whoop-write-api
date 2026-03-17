@@ -6,12 +6,12 @@ Documented at [developer.whoop.com](https://developer.whoop.com). OAuth2 require
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | /developer/v1/recovery | Recovery scores (HRV, RHR, SpO2) |
-| GET | /developer/v1/activity/sleep | Sleep stages, performance, efficiency |
-| GET | /developer/v1/activity/workout | Workout strain, HR data |
-| GET | /developer/v1/cycle | Daily strain cycles |
-| GET | /developer/v1/user/body_measurement | Height, weight, max HR |
-| GET | /developer/v1/user/profile/basic | User profile |
+| GET | /developer/v2/recovery | Recovery scores (HRV, RHR, SpO2) |
+| GET | /developer/v2/activity/sleep | Sleep stages, performance, efficiency |
+| GET | /developer/v2/activity/workout | Workout strain, HR data |
+| GET | /developer/v2/cycle | Daily strain cycles |
+| GET | /developer/v2/user/body_measurement | Height, weight, max HR |
+| GET | /developer/v2/user/profile/basic | User profile |
 
 All collection endpoints support pagination: `start`, `end` (ISO 8601), `limit` (max 25), `nextToken`.
 
