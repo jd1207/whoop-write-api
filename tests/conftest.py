@@ -13,5 +13,10 @@ def mock_oauth():
         yield respx_mock
 
 @pytest.fixture
+def mock_cognito():
+    with respx.mock(base_url="https://cognito-idp.us-west-2.amazonaws.com") as respx_mock:
+        yield respx_mock
+
+@pytest.fixture
 def fake_token():
     return "fake-bearer-token-12345"
