@@ -6,6 +6,7 @@ from whoop.write_models import (
     WorkoutWrite, ExerciseWrite, WorkoutResult, SportTypeInfo,
     ActivityResult, DetailedExercise, JournalInput, JournalBehavior,
 )
+from whoop.write_exercises import ExerciseCatalog
 from whoop.exceptions import WhoopAPIError
 from whoop import write_journal
 
@@ -24,6 +25,7 @@ class WhoopWriteAPI:
         self.token = token
         self.timezone = timezone
         self._sport_types_cache: list[SportTypeInfo] | None = None
+        self._exercises_cache: ExerciseCatalog | None = None
         try:
             ZoneInfo(timezone)
         except KeyError:
@@ -129,6 +131,13 @@ class WhoopWriteAPI:
         data = await self._get("/activities-service/v2/activity-types")
         self._sport_types_cache = [SportTypeInfo.from_api(item) for item in data]
         return self._sport_types_cache
+
+    async def get_exercises(self) -> ExerciseCatalog:
+        if self._exercises_cache is not None:
+            return self._exercises_cache
+        data = await self._get("/weightlifting-service/v2/exercise")
+        self._exercises_cache = ExerciseCatalog.from_api(data)
+        return self._exercises_cache
 
     async def create_activity(
         self, activity_type: str, start: str, end: str,

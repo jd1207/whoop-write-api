@@ -132,6 +132,50 @@ Response: 204 No Content
 
 ### Strength Training / Exercises
 
+#### Get Exercise Library
+
+Fetches the complete Whoop exercise catalog (310 exercises) with equipment types, muscle groups, movement patterns, instructions, and image/video URLs.
+
+```
+GET /weightlifting-service/v2/exercise
+```
+
+Response (200):
+
+```json
+{
+  "exercises": [
+    {
+      "exercise_id": "BENCHPRESS_BARBELL",
+      "name": "Bench Press - Barbell",
+      "equipment": "BARBELL",
+      "muscle_groups": ["CHEST"],
+      "movement_pattern": "HORIZONTAL_PRESS",
+      "exercise_type": "STRENGTH",
+      "volume_input_format": "REPS",
+      "laterality": "BILATERAL",
+      "trackable": true,
+      "instructions": ["Lie on the bench with your back and head resting on it..."],
+      "image_url": "https://dh6o7n168ts9.cloudfront.net/exercises/BENCHPRESS_BARBELL.jpg",
+      "video_url": "https://dh6o7n168ts9.cloudfront.net/exercise-videos-temp/BENCHPRESS_BARBELL.mp4"
+    }
+  ],
+  "filter_options": {
+    "equipment": [{"internal_value": "BARBELL"}, {"internal_value": "BODY"}, ...],
+    "muscle_groups": [{"internal_value": "CHEST"}, {"internal_value": "LEGS"}, ...],
+    "movement_patterns": [{"internal_value": "SQUAT"}, {"internal_value": "HINGE"}, ...]
+  }
+}
+```
+
+Equipment types: `BARBELL`, `BODY`, `DUMBBELL`, `KETTLEBELL`, `MACHINE`, `MEDICINE_BALL`, `OTHER`, `PLYO_BOX`, `PULL_UP_BAR`, `STABILITY_BALL`
+
+Muscle groups: `ARMS`, `BACK`, `CHEST`, `CORE`, `FULL_BODY`, `LEGS`, `OTHER`, `SHOULDERS`
+
+Movement patterns: `HINGE`, `HORIZONTAL_PRESS`, `HORIZONTAL_PULL`, `JUMP`, `LUNGE`, `OLY_LIFT`, `OTHER`, `SQUAT`, `VERTICAL_PRESS`, `VERTICAL_PULL`
+
+Volume input formats: `REPS` (count), `WEIGHT` (weight + reps), `TIME` (seconds)
+
 #### Link Exercises to a Workout
 
 After creating a weightlifting activity, link exercises with full set/rep/weight data.

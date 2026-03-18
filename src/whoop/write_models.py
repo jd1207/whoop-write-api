@@ -1,5 +1,5 @@
 from __future__ import annotations
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 
 @dataclass
@@ -166,4 +166,35 @@ class JournalBehavior:
             internal_name=data["internal_name"],
             behavior_type=data["behavior_type"],
             question_text=data["question_text"],
+        )
+
+
+@dataclass
+class Exercise:
+    exercise_id: str
+    name: str
+    equipment: str
+    muscle_groups: list[str]
+    movement_pattern: str
+    exercise_type: str
+    volume_input_format: str
+    laterality: str = ""
+    instructions: list[str] | None = None
+    image_url: str | None = None
+    video_url: str | None = None
+    trackable: bool = True
+
+    @classmethod
+    def from_api(cls, data: dict) -> Exercise:
+        return cls(
+            exercise_id=data["exercise_id"], name=data["name"],
+            equipment=data.get("equipment", ""),
+            muscle_groups=data.get("muscle_groups", []),
+            movement_pattern=data.get("movement_pattern", ""),
+            exercise_type=data.get("exercise_type", ""),
+            volume_input_format=data.get("volume_input_format", ""),
+            laterality=data.get("laterality", ""),
+            instructions=data.get("instructions"),
+            image_url=data.get("image_url"), video_url=data.get("video_url"),
+            trackable=data.get("trackable", True),
         )

@@ -176,6 +176,24 @@ result = await client.link_exercises_detailed(activity.id, exercises)
 
 Common exercise IDs: `BENCHPRESS_BARBELL`, `SQUAT_BARBELL`, `DEADLIFT_BARBELL`, `OVERHEADPRESS_BARBELL`, `PULLUP`, `PUSHUP`, `FRONTPLANKELBOW`. Pattern is `EXERCISENAME_EQUIPMENT`.
 
+### Exercise Library
+
+Fetch the complete Whoop exercise catalog (310 exercises) with search and filtering:
+
+```python
+catalog = await client.get_exercises()
+
+# search by name
+bench_exercises = catalog.search("bench press")
+
+# filter by equipment, muscle group, or movement pattern
+barbell_chest = catalog.filter(equipment="BARBELL", muscle_group="CHEST")
+
+# look up by exact ID
+ex = catalog.find_by_id("BENCHPRESS_BARBELL")
+print(f"{ex.name} — {ex.instructions[0]}")
+```
+
 ### Journal
 
 ```python
@@ -232,7 +250,6 @@ SportType.RUNNING        # 0
 - [ ] `async with` context manager for connection pooling
 - [ ] Synchronous client wrapper
 - [ ] Cognito auth flow (programmatic login without mitmproxy)
-- [ ] Full exercise library catalog endpoint
 
 See ENDPOINTS.md for the full endpoint reference.
 
