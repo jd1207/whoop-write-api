@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.4.0 (unreleased)
+
+- Add `CognitoAuth` for programmatic Whoop login (no mitmproxy, no boto3)
+- Add `TokenSet` dataclass for access/refresh/expires_at token management
+- Add auto token refresh — `WhoopClient` refreshes before each request when using `token_set`
+- Add `on_token_refresh` callback for persisting refreshed tokens
+- Add `WhoopAuthExpiredError` for terminal auth failures (refresh token revoked)
+- Add `async with WhoopClient(...)` context manager for connection pooling
+- Add `TokenHolder` pattern — token refresh propagates to read/write APIs automatically
+- Add 401 retry — one automatic refresh + retry on unauthorized responses
+- Thread shared `httpx.AsyncClient` through all read, write, and journal methods
+
 ## v0.3.0 (unreleased)
 
 - Add `create_activity()` via v2 endpoint — uses string type names ("sauna", "weightlifting")

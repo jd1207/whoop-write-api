@@ -72,24 +72,38 @@ client = WhoopClient(auth=auth)
 
 **Does NOT work with:** `log_workout()`, journal, weight updates, activity deletion, or any other write endpoint. The developer OAuth token only has access to official read endpoints.
 
-### Cognito auth — read + write APIs
+### Cognito auth — read + write APIs (recommended)
 
-The write API uses the same auth system as the Whoop mobile app (AWS Cognito). Tokens from this flow have access to all internal endpoints including activity creation, exercise linking, journal, and profile updates.
-
-To get a Cognito token, you need to either:
-
-1. **Capture it via mitmproxy** from the Whoop app (see ENDPOINTS.md)
-2. **Use the Cognito auth flow directly** with the mobile app's client ID
+Log in with your Whoop email/password. Tokens auto-refresh — no manual intervention needed.
 
 ```python
-client = WhoopClient(token="cognito-bearer-token")
+from whoop import CognitoAuth, WhoopClient, TokenSet, WhoopAuthExpiredError
 
-# now both read AND write work
-recoveries = await client.get_recovery()
-result = await client.log_workout(workout)
+# first time: log in and save tokens
+auth = CognitoAuth()
+tokens = await auth.login("your@email.com", "your-password")
+# save tokens.access_token, tokens.refresh_token, tokens.expires_at to your DB
+
+# every time after: load tokens and go
+async def on_refresh(new_tokens: TokenSet):
+    db.save(new_tokens)  # persist refreshed tokens
+
+async with WhoopClient(
+    token_set=tokens,
+    on_token_refresh=on_refresh,
+) as client:
+    recovery = await client.get_recovery()
+    await client.create_activity("sauna", start, end)
 ```
 
+Tokens refresh automatically before expiry. If the refresh token expires (weeks/months), `WhoopAuthExpiredError` is raised so you can prompt re-auth.
+
 **Works with:** everything — all read endpoints, activity creation, exercise linking, journal entries, weight updates, activity deletion.
+
+You can also pass a raw bearer token if you have one:
+```python
+client = WhoopClient(token="cognito-bearer-token")
+```
 
 ### Which do I need?
 
@@ -247,9 +261,7 @@ SportType.RUNNING        # 0
 
 ### Future
 
-- [ ] `async with` context manager for connection pooling
 - [ ] Synchronous client wrapper
-- [ ] Cognito auth flow (programmatic login without mitmproxy)
 
 See ENDPOINTS.md for the full endpoint reference.
 
