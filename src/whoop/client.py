@@ -4,7 +4,8 @@ from whoop.read import WhoopReadAPI
 from whoop.write import WhoopWriteAPI
 from whoop.models import (
     Recovery, Sleep, Workout, Cycle, BodyMeasurement, WorkoutWrite,
-    WorkoutResult, SportTypeInfo,
+    WorkoutResult, SportTypeInfo, ActivityResult, DetailedExercise,
+    JournalInput, JournalBehavior,
 )
 
 
@@ -45,3 +46,37 @@ class WhoopClient:
 
     async def get_sport_types(self) -> list[SportTypeInfo]:
         return await self._write.get_sport_types()
+
+    async def create_activity(
+        self, activity_type: str, start: str, end: str,
+    ) -> ActivityResult:
+        return await self._write.create_activity(activity_type, start, end)
+
+    async def delete_activity(
+        self, activity_id: str, is_recovery: bool = False,
+    ) -> None:
+        return await self._write.delete_activity(activity_id, is_recovery)
+
+    async def link_exercises_detailed(
+        self, activity_id: str, exercises: list[DetailedExercise],
+    ) -> dict:
+        return await self._write.link_exercises_detailed(activity_id, exercises)
+
+    async def log_journal(
+        self, date: str, inputs: list[JournalInput], notes: str = "",
+    ) -> None:
+        return await self._write.log_journal(date, inputs, notes)
+
+    async def get_journal_behaviors(self, date: str) -> list[JournalBehavior]:
+        return await self._write.get_journal_behaviors(date)
+
+    async def update_weight(self, weight_kg: float) -> bool:
+        return await self._write.update_weight(weight_kg)
+
+    async def set_alarm(
+        self,
+        time: str,
+        enabled: bool = True,
+        timezone_offset: str = "-0400",
+    ) -> dict:
+        return await self._write.set_alarm(time, enabled, timezone_offset)
