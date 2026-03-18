@@ -7,6 +7,7 @@ from whoop.models import (
     WorkoutResult, SportTypeInfo, ActivityResult, DetailedExercise,
     JournalInput, JournalBehavior,
 )
+from whoop.write_exercises import ExerciseCatalog
 
 
 class WhoopClient:
@@ -46,6 +47,9 @@ class WhoopClient:
 
     async def get_sport_types(self) -> list[SportTypeInfo]:
         return await self._write.get_sport_types()
+
+    async def get_exercises(self) -> ExerciseCatalog:
+        return await self._write.get_exercises()
 
     async def create_activity(
         self, activity_type: str, start: str, end: str,
