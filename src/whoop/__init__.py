@@ -4,6 +4,8 @@ from whoop.client import WhoopClient
 from whoop.models import (
     Recovery, Sleep, Workout, Cycle, BodyMeasurement,
     WorkoutWrite, ExerciseWrite, SportTypeInfo, WorkoutResult,
+    ActivityResult, JournalInput, JournalBehavior,
+    DetailedExercise, ExerciseSet,
 )
 from whoop.sport_types import SportType
 from whoop.exceptions import WhoopAuthError, WhoopAPIError, WhoopRateLimitError
@@ -17,6 +19,8 @@ __all__ = [
     "WhoopClient",
     "Recovery", "Sleep", "Workout", "Cycle", "BodyMeasurement",
     "WorkoutWrite", "ExerciseWrite", "SportTypeInfo", "WorkoutResult",
+    "ActivityResult", "JournalInput", "JournalBehavior",
+    "DetailedExercise", "ExerciseSet",
     "SportType",
     "WhoopAuthError", "WhoopAPIError", "WhoopRateLimitError",
     "__version__",

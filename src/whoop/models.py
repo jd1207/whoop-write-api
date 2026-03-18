@@ -1,6 +1,19 @@
 from __future__ import annotations
 from dataclasses import dataclass
 
+# re-export write models for backward compatibility
+from whoop.write_models import (  # noqa: F401
+    ExerciseWrite,
+    WorkoutWrite,
+    WorkoutResult,
+    SportTypeInfo,
+    ActivityResult,
+    JournalInput,
+    JournalBehavior,
+    DetailedExercise,
+    ExerciseSet,
+)
+
 
 @dataclass
 class Recovery:
@@ -120,64 +133,3 @@ class BodyMeasurement:
             weight_kilogram=data["weight_kilogram"],
             max_heart_rate=data["max_heart_rate"],
         )
-
-
-@dataclass
-class ExerciseWrite:
-    name: str
-    sets: int
-    reps: int
-    weight: float
-    weight_unit: str = "lbs"
-
-    def to_dict(self) -> dict:
-        return {
-            "name": self.name,
-            "sets": self.sets,
-            "reps": self.reps,
-            "weight": self.weight,
-            "weight_unit": self.weight_unit,
-        }
-
-
-@dataclass
-class WorkoutWrite:
-    sport_id: int
-    start: str
-    end: str
-    exercises: list[ExerciseWrite] | None = None
-
-    def to_activity_payload(self, timezone_offset: str = "+0000") -> dict:
-        return {
-            "gpsEnabled": False,
-            "timezoneOffset": timezone_offset,
-            "sportId": self.sport_id,
-            "source": "user",
-            "during": {
-                "lower": self.start,
-                "upper": self.end,
-                "bounds": "[)",
-            },
-        }
-
-    def to_exercises_payload(self) -> list[dict]:
-        if not self.exercises:
-            return []
-        return [ex.to_dict() for ex in self.exercises]
-
-
-@dataclass
-class SportTypeInfo:
-    id: int
-    name: str
-
-    @classmethod
-    def from_api(cls, data: dict) -> SportTypeInfo:
-        return cls(id=data["id"], name=data["name"])
-
-
-@dataclass
-class WorkoutResult:
-    activity_id: int
-    exercises_linked: bool
-    error: str | None = None
