@@ -4,7 +4,9 @@ from dataclasses import dataclass
 import httpx
 from whoop.exceptions import WhoopAuthError, WhoopAuthExpiredError
 
-COGNITO_URL = "https://cognito-idp.us-west-2.amazonaws.com/"
+# whoop's auth proxy handles SECRET_HASH server-side so callers
+# don't need the cognito client secret
+AUTH_URL = "https://api.prod.whoop.com/auth-service/v3/whoop"
 DEFAULT_CLIENT_ID = "37365lrcda1js3fapqfe2n40eh"
 
 COGNITO_HEADERS = {
@@ -34,7 +36,7 @@ class CognitoAuth:
         }
         async with httpx.AsyncClient() as client:
             resp = await client.post(
-                COGNITO_URL, headers=COGNITO_HEADERS, json=payload,
+                AUTH_URL, headers=COGNITO_HEADERS, json=payload,
             )
         if resp.status_code != 200:
             data = resp.json()
