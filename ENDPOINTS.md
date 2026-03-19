@@ -19,55 +19,393 @@ Rate limits: 100 req/min, 10,000 req/day.
 
 ## Unofficial Write API (api.prod.whoop.com)
 
-**These endpoints are reverse-engineered and may change without notice.**
+**These are undocumented internal endpoints and may change without notice.** Users authenticate with their own Whoop credentials to manage their own data.
 
-Source: traffic analysis of the Whoop mobile app. See `scripts/find_endpoints.py` for discovery tools.
+Source: Whoop iOS app v5.43.0 (March 2026).
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | /activities-service/v0/workouts | Create a workout activity |
-| POST | /weightlifting-service/v2/weightlifting-workout/link-cardio-workout | Link exercises to a workout |
-| POST | /weightlifting-service/v3/workout-template | Create a workout template |
-| GET | /weightlifting-service/v2/workout-library/ | Get workout templates |
-| GET | /activities-service/v1/sports/history | Get sports/activity history |
-| GET | /activities-service/v2/activity-types | Get all activity types |
-
-### Required Headers (write endpoints)
+### Required Headers
 
 ```
 Authorization: Bearer <token>
 Content-Type: application/json
 x-whoop-device-platform: API
-locale: en_US
-x-whoop-time-zone: America/Los_Angeles
+x-whoop-time-zone: America/New_York
 ```
 
-### Create Workout Payload
+---
+
+### Activities
+
+#### Create Activity (non-GPS)
+
+Use for sauna, stretching, meditation, ice bath, yoga, weightlifting, and other non-GPS activities.
+
+```
+POST /activities-service/v2/activities
+```
 
 ```json
 {
-  "gpsEnabled": false,
-  "timezoneOffset": "+0000",
-  "sportId": 1,
+  "during": "['2026-03-18T21:02:54.336Z','2026-03-18T21:03:11.048Z')",
   "source": "user",
-  "during": {
-    "lower": "2026-03-16T14:00:00.000Z",
-    "upper": "2026-03-16T15:00:00.000Z",
-    "bounds": "[)"
+  "type": "sauna",
+  "timezone": "America/New_York"
+}
+```
+
+The `during` field uses PostgreSQL range syntax: `['start','end')`.
+
+The `type` field uses string names. Known values:
+
+| Type String | Activity |
+|-------------|----------|
+| `running` | Running |
+| `cycling` | Cycling |
+| `weightlifting` | Weightlifting |
+| `sauna` | Dry Sauna |
+| `ice_bath` | Ice Bath |
+| `meditation` | Meditation |
+| `yoga` | Yoga |
+| `stretching` | Stretching |
+| `walking` | Walking |
+| `hiking` | Hiking |
+| `swimming` | Swimming |
+
+Response (200):
+
+```json
+{
+  "id": "68f455f4-b2fe-45ad-91c4-2f613fb7ed74",
+  "cycle_id": 987654321,
+  "user_id": 12345678,
+  "during": "['2026-03-18T21:02:54.336Z','2026-03-18T21:03:11.048Z')",
+  "timezone": "America/New_York",
+  "source": "user",
+  "score_state": "pending",
+  "score_type": "RECOVERY",
+  "type": "sauna",
+  "translated_type": "Dry Sauna",
+  "timezone_offset_from_model": "-04:00"
+}
+```
+
+Note: `id` is a UUID string, not an integer. `score_type` is `"RECOVERY"` for recovery activities (sauna, stretching, meditation) and `"CARDIO"` for cardio/strength.
+
+#### Create Activity (GPS)
+
+Use for running and other GPS-tracked activities.
+
+```
+POST /core-details-bff/v0/create-activity
+```
+
+```json
+{
+  "sport_id": 0,
+  "start_time": "2026-03-18T21:02:29.968Z",
+  "end_time": "2026-03-18T21:02:36.375Z",
+  "gps_enabled": true
+}
+```
+
+Uses integer `sport_id` (see SportType enum). Response format same as non-GPS but `score_type` is `"CARDIO"`.
+
+#### Delete Cardio/Strength Activity
+
+```
+DELETE /core-details-bff/v1/cardio-details?activityId={uuid}
+```
+
+Response: 204 No Content
+
+#### Delete Recovery Activity
+
+For sauna, stretching, meditation, ice bath, etc.
+
+```
+DELETE /core-details-bff/v1/recovery-details?recoveryActivityId={uuid}
+```
+
+Response: 204 No Content
+
+---
+
+### Strength Training / Exercises
+
+#### Get Exercise Library
+
+Fetches the complete Whoop exercise catalog (310 exercises) with equipment types, muscle groups, movement patterns, instructions, and image/video URLs.
+
+```
+GET /weightlifting-service/v2/exercise
+```
+
+Response (200):
+
+```json
+{
+  "exercises": [
+    {
+      "exercise_id": "BENCHPRESS_BARBELL",
+      "name": "Bench Press - Barbell",
+      "equipment": "BARBELL",
+      "muscle_groups": ["CHEST"],
+      "movement_pattern": "HORIZONTAL_PRESS",
+      "exercise_type": "STRENGTH",
+      "volume_input_format": "REPS",
+      "laterality": "BILATERAL",
+      "trackable": true,
+      "instructions": ["Lie on the bench with your back and head resting on it..."],
+      "image_url": "https://dh6o7n168ts9.cloudfront.net/exercises/BENCHPRESS_BARBELL.jpg",
+      "video_url": "https://dh6o7n168ts9.cloudfront.net/exercise-videos-temp/BENCHPRESS_BARBELL.mp4"
+    }
+  ],
+  "filter_options": {
+    "equipment": [{"internal_value": "BARBELL"}, {"internal_value": "BODY"}, ...],
+    "muscle_groups": [{"internal_value": "CHEST"}, {"internal_value": "LEGS"}, ...],
+    "movement_patterns": [{"internal_value": "SQUAT"}, {"internal_value": "HINGE"}, ...]
   }
 }
 ```
 
-### Link Exercises Payload
+Equipment types: `BARBELL`, `BODY`, `DUMBBELL`, `KETTLEBELL`, `MACHINE`, `MEDICINE_BALL`, `OTHER`, `PLYO_BOX`, `PULL_UP_BAR`, `STABILITY_BALL`
+
+Muscle groups: `ARMS`, `BACK`, `CHEST`, `CORE`, `FULL_BODY`, `LEGS`, `OTHER`, `SHOULDERS`
+
+Movement patterns: `HINGE`, `HORIZONTAL_PRESS`, `HORIZONTAL_PULL`, `JUMP`, `LUNGE`, `OLY_LIFT`, `OTHER`, `SQUAT`, `VERTICAL_PRESS`, `VERTICAL_PULL`
+
+Volume input formats: `REPS` (count), `WEIGHT` (weight + reps), `TIME` (seconds)
+
+#### Link Exercises to a Workout
+
+After creating a weightlifting activity, link exercises with full set/rep/weight data.
+
+```
+POST /weightlifting-service/v2/weightlifting-workout/link-cardio-workout
+```
 
 ```json
 {
-  "cardio_workout_id": 42,
-  "exercises": [
-    {"name": "Bench Press", "sets": 5, "reps": 3, "weight": 235, "weight_unit": "lbs"}
-  ]
+  "template": {
+    "workout_groups": [
+      {
+        "workout_exercises": [
+          {
+            "exercise_details": {
+              "exercise_id": "BENCHPRESS_BARBELL",
+              "name": "Bench Press - Barbell",
+              "equipment": "BARBELL",
+              "muscle_groups": ["CHEST"],
+              "exercise_type": "STRENGTH",
+              "volume_input_format": "REPS",
+              "laterality": "BILATERAL",
+              "movement_pattern": "HORIZONTAL_PRESS"
+            },
+            "sets": [
+              {"number_of_reps": 3, "weight": 225},
+              {"number_of_reps": 4, "weight": 225},
+              {"number_of_reps": 5, "weight": 225}
+            ]
+          }
+        ]
+      },
+      {
+        "workout_exercises": [
+          {
+            "exercise_details": {
+              "exercise_id": "FRONTPLANKELBOW",
+              "name": "Front Plank",
+              "equipment": "BODY",
+              "muscle_groups": ["CORE"],
+              "exercise_type": "STRENGTH",
+              "volume_input_format": "REPS"
+            },
+            "sets": [
+              {"number_of_reps": 0, "weight": 0, "time_in_seconds": 60},
+              {"number_of_reps": 0, "weight": 0, "time_in_seconds": 60}
+            ]
+          }
+        ]
+      }
+    ]
+  }
 }
 ```
+
+Key details:
+- Each exercise group in `workout_groups` contains one exercise with multiple sets
+- `exercise_id` is a string identifier from Whoop's exercise library (e.g., `BENCHPRESS_BARBELL`)
+- `weight` is in pounds (matches unit_system in user profile)
+- Timed exercises (planks, holds) use `time_in_seconds` instead of `number_of_reps`
+- The `exercise_details` fields `equipment`, `muscle_groups`, `movement_pattern` are optional but improve Whoop's strain calculations
+
+Response (200):
+
+```json
+{
+  "original_activity_id": "e4f1d7cf-0eb4-4ba1-a595-39d186ec4166",
+  "original_activity_type": "weightlifting",
+  "workout_metadata": {
+    "id": "e4f1d7cf-...",
+    "score_state": "complete",
+    "type": "weightlifting",
+    "weightlifting_workout_id": "e93efcf9-...",
+    "workout_template_id": 9435983,
+    "total_effective_volume_kg": 3309.854,
+    "raw_msk_strain_score": 0.034
+  }
+}
+```
+
+#### Save Workout Template
+
+Save a workout as a reusable template.
+
+```
+POST /weightlifting-service/v3/workout-template
+```
+
+Same payload structure as the `workout_groups` in link-cardio-workout. Returns `workout_template_key` for future use.
+
+#### Known Exercise IDs
+
+Exercises use string IDs from Whoop's library. Common ones:
+
+| Exercise ID | Name | Equipment | Muscle Groups |
+|-------------|------|-----------|---------------|
+| `BENCHPRESS_BARBELL` | Bench Press - Barbell | BARBELL | CHEST |
+| `SQUAT_BARBELL` | Squat - Barbell | BARBELL | QUADS |
+| `DEADLIFT_BARBELL` | Deadlift - Barbell | BARBELL | BACK |
+| `FRONTPLANKELBOW` | Front Plank | BODY | CORE |
+| `OVERHEADPRESS_BARBELL` | Overhead Press - Barbell | BARBELL | SHOULDERS |
+
+The full exercise library can be browsed in the Whoop app's exercise picker.
+
+---
+
+### Journal
+
+#### Get Journal Behaviors (tracker definitions)
+
+```
+GET /journal-service/v2/journals/behaviors/user/{YYYY-MM-DD}
+```
+
+Returns all available journal trackers with their IDs, types, and magnitude ranges.
+
+#### Get Journal Draft
+
+```
+GET /journal-service/v3/journals/drafts/mobile/{YYYY-MM-DD}
+```
+
+Returns any existing journal entries for the date.
+
+#### Log Journal Entry
+
+```
+PUT /journal-service/v2/journals/entries/user/date/{YYYY-MM-DD}
+```
+
+```json
+{
+  "tracker_inputs": [
+    {
+      "behavior_tracker_id": 1,
+      "answered_yes": false
+    },
+    {
+      "behavior_tracker_id": 2,
+      "answered_yes": true,
+      "magnitude_input_value": 1,
+      "magnitude_input_label": "1",
+      "time_input_value": 1773842400000
+    },
+    {
+      "behavior_tracker_id": 6,
+      "answered_yes": false
+    }
+  ],
+  "notes": "Optional free text notes"
+}
+```
+
+Known behavior tracker IDs:
+
+| ID | Name | Type | Magnitude |
+|----|------|------|-----------|
+| 1 | Alcohol | YES_NO | 1-20 drinks |
+| 2 | Caffeine | YES_NO | 1-10 servings |
+| 6 | Late Meal | YES_NO | — |
+| 28 | Screentime | YES_NO | — |
+| 89 | Protein | YES_NO | 0-1000 grams |
+
+Additional trackers may vary by user configuration. Use the behaviors endpoint to get the current user's full tracker list.
+
+Response: 204 No Content
+
+---
+
+### Profile
+
+#### Update Profile / Weight
+
+```
+PUT /profile-service/v1/profile
+```
+
+```json
+{
+  "first_name": "Jane",
+  "last_name": "Doe",
+  "email": "user@example.com",
+  "birthday": "1995-06-15",
+  "gender": "FEMALE",
+  "physiological_baseline": "FEMALE",
+  "height": 1.70,
+  "weight": 68.0,
+  "unit_system": "imperial",
+  "country": "US",
+  "state": "CA"
+}
+```
+
+All fields are required (send the full profile). `weight` is in kilograms. `height` is in meters.
+
+Response: `true` (200)
+
+---
+
+### Sleep / Alarm
+
+#### Set Smart Alarm
+
+```
+PUT /smart-alarm-service/v1/smartalarm/preferences
+```
+
+```json
+{
+  "enabled": true,
+  "goal": "EXACT_TIME_OPTIMIZE_SLEEP",
+  "upper_time_bound": "08:46:00",
+  "time_zone_offset": "-0400",
+  "schedule_enabled": false
+}
+```
+
+Response includes computed alarm bounds and sleep recommendations.
+
+---
+
+### Legacy Endpoints
+
+These older endpoints may still work but the Whoop app has migrated away from them:
+
+| Method | Endpoint | Replacement |
+|--------|----------|-------------|
+| POST | /activities-service/v0/workouts | /activities-service/v2/activities |
+| POST | /core-details-bff/v2/create-activity | /core-details-bff/v0/create-activity (v2 has date parsing issues) |
 
 ## Endpoint Discovery
 

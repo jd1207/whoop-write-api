@@ -13,3 +13,8 @@ class WhoopRateLimitError(WhoopAPIError):
     def __init__(self, retry_after: int, message: str = "rate limited"):
         super().__init__(message, status_code=429)
         self.retry_after = retry_after
+
+
+class WhoopAuthExpiredError(WhoopAuthError):
+    """refresh token is no longer valid — re-authentication required"""
+    pass
