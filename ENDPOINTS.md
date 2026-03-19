@@ -19,9 +19,9 @@ Rate limits: 100 req/min, 10,000 req/day.
 
 ## Unofficial Write API (api.prod.whoop.com)
 
-**These endpoints are reverse-engineered and may change without notice.**
+**These are undocumented internal endpoints and may change without notice.** Users authenticate with their own Whoop credentials to manage their own data.
 
-Source: traffic analysis of Whoop iOS app v5.43.0 (March 2026).
+Source: Whoop iOS app v5.43.0 (March 2026).
 
 ### Required Headers
 
