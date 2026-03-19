@@ -6,3 +6,10 @@ dist/
 .pytest_cache/
 .ruff_cache/
 tools/
+venv/
+.venv/
+.token
+*.token
+*.log
+*.pem
+*.key
