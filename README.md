@@ -1,12 +1,12 @@
 # whoop-write-api
 
-Python client for the Whoop API — both official read endpoints and reverse-engineered write endpoints.
+Unofficial Python client for the Whoop API — official read endpoints plus unofficial write endpoints for managing your own Whoop data.
 
 ## Why?
 
-The official Whoop API is read-only. This library adds write support so you can programmatically log any activity — weightlifting with full exercise details, sauna sessions, ice baths, meditation, or any of Whoop's 80+ activity types.
+The official Whoop API is read-only. This library adds write support so you can programmatically log activities, track workouts with full exercise details, manage journal entries, update your weight, and more — all through your own Whoop account using your own credentials.
 
-> **Disclaimer:** Write endpoints are reverse-engineered from Whoop's internal API and may break without notice. Using these endpoints may violate Whoop's Terms of Service and could result in account action. Read endpoints use the official documented API. This project is not affiliated with Whoop.
+> **Note:** This is an unofficial client library and is not affiliated with or endorsed by Whoop. Write endpoints use Whoop's internal API, which is undocumented and may change without notice. Users authenticate with their own Whoop credentials to manage their own data. Use at your own discretion.
 
 ## Install
 
@@ -127,9 +127,9 @@ All official Whoop API endpoints:
 - `client.get_cycles(start?, end?)` — daily strain cycles
 - `client.get_body_measurement()` — height, weight, max HR
 
-## Write API (unofficial)
+## Write API
 
-Requires Cognito auth. See [Authentication](#authentication) above.
+Requires Cognito auth (login with your Whoop email/password). See [Authentication](#authentication) above.
 
 ### Activities
 
