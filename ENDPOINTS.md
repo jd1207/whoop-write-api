@@ -76,8 +76,8 @@ Response (200):
 ```json
 {
   "id": "68f455f4-b2fe-45ad-91c4-2f613fb7ed74",
-  "cycle_id": 1374850090,
-  "user_id": 23759045,
+  "cycle_id": 987654321,
+  "user_id": 12345678,
   "during": "['2026-03-18T21:02:54.336Z','2026-03-18T21:03:11.048Z')",
   "timezone": "America/New_York",
   "source": "user",
@@ -356,17 +356,17 @@ PUT /profile-service/v1/profile
 
 ```json
 {
-  "first_name": "Juan",
-  "last_name": "Salazar",
+  "first_name": "Jane",
+  "last_name": "Doe",
   "email": "user@example.com",
-  "birthday": "2000-12-07",
-  "gender": "MALE",
-  "physiological_baseline": "MALE",
-  "height": 1.905,
-  "weight": 115.67,
+  "birthday": "1995-06-15",
+  "gender": "FEMALE",
+  "physiological_baseline": "FEMALE",
+  "height": 1.70,
+  "weight": 68.0,
   "unit_system": "imperial",
   "country": "US",
-  "state": "NJ"
+  "state": "CA"
 }
 ```
 
