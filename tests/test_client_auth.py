@@ -43,13 +43,13 @@ async def test_context_manager(mock_api, fake_token):
 
 
 @pytest.mark.asyncio
-async def test_context_manager_calls_ensure_token(mock_cognito):
+async def test_context_manager_calls_ensure_token(mock_api):
     ts = TokenSet(
         access_token="old",
         refresh_token="refresh-123",
         expires_at=time.time() - 100,
     )
-    mock_cognito.post("/").mock(
+    mock_api.post("/auth-service/v3/whoop").mock(
         return_value=httpx.Response(200, json={
             "AuthenticationResult": {
                 "AccessToken": "new-from-enter",
@@ -102,13 +102,13 @@ async def test_ensure_token_skips_when_not_near_expiry():
 
 
 @pytest.mark.asyncio
-async def test_ensure_token_refreshes_when_expiring(mock_cognito):
+async def test_ensure_token_refreshes_when_expiring(mock_api):
     ts = TokenSet(
         access_token="old-access",
         refresh_token="refresh-123",
         expires_at=time.time() - 100,
     )
-    mock_cognito.post("/").mock(
+    mock_api.post("/auth-service/v3/whoop").mock(
         return_value=httpx.Response(200, json={
             "AuthenticationResult": {
                 "AccessToken": "new-access",
@@ -122,13 +122,13 @@ async def test_ensure_token_refreshes_when_expiring(mock_cognito):
 
 
 @pytest.mark.asyncio
-async def test_ensure_token_calls_callback(mock_cognito):
+async def test_ensure_token_calls_callback(mock_api):
     ts = TokenSet(
         access_token="old",
         refresh_token="refresh-123",
         expires_at=time.time() - 100,
     )
-    mock_cognito.post("/").mock(
+    mock_api.post("/auth-service/v3/whoop").mock(
         return_value=httpx.Response(200, json={
             "AuthenticationResult": {
                 "AccessToken": "new",
@@ -146,13 +146,13 @@ async def test_ensure_token_calls_callback(mock_cognito):
 
 
 @pytest.mark.asyncio
-async def test_ensure_token_no_callback_ok(mock_cognito):
+async def test_ensure_token_no_callback_ok(mock_api):
     ts = TokenSet(
         access_token="old",
         refresh_token="refresh-123",
         expires_at=time.time() - 100,
     )
-    mock_cognito.post("/").mock(
+    mock_api.post("/auth-service/v3/whoop").mock(
         return_value=httpx.Response(200, json={
             "AuthenticationResult": {
                 "AccessToken": "new",
@@ -166,13 +166,13 @@ async def test_ensure_token_no_callback_ok(mock_cognito):
 
 
 @pytest.mark.asyncio
-async def test_ensure_token_expired_refresh_raises(mock_cognito):
+async def test_ensure_token_expired_refresh_raises(mock_api):
     ts = TokenSet(
         access_token="old",
         refresh_token="dead-refresh",
         expires_at=time.time() - 100,
     )
-    mock_cognito.post("/").mock(
+    mock_api.post("/auth-service/v3/whoop").mock(
         return_value=httpx.Response(400, json={
             "__type": "NotAuthorizedException",
             "message": "Refresh Token has expired.",
@@ -231,7 +231,7 @@ async def test_token_propagates_to_read_write():
 
 
 @pytest.mark.asyncio
-async def test_401_triggers_refresh_and_retry(mock_api, mock_cognito):
+async def test_401_triggers_refresh_and_retry(mock_api):
     ts = TokenSet(
         access_token="stale",
         refresh_token="refresh-ok",
@@ -249,7 +249,7 @@ async def test_401_triggers_refresh_and_retry(mock_api, mock_cognito):
         })
 
     mock_api.get("/developer/v2/recovery").mock(side_effect=api_handler)
-    mock_cognito.post("/").mock(
+    mock_api.post("/auth-service/v3/whoop").mock(
         return_value=httpx.Response(200, json={
             "AuthenticationResult": {
                 "AccessToken": "fresh",
@@ -264,7 +264,7 @@ async def test_401_triggers_refresh_and_retry(mock_api, mock_cognito):
 
 
 @pytest.mark.asyncio
-async def test_401_after_retry_raises(mock_api, mock_cognito):
+async def test_401_after_retry_raises(mock_api):
     ts = TokenSet(
         access_token="stale",
         refresh_token="refresh-ok",
@@ -273,7 +273,7 @@ async def test_401_after_retry_raises(mock_api, mock_cognito):
     mock_api.get("/developer/v2/recovery").mock(
         return_value=httpx.Response(401, text="Unauthorized"),
     )
-    mock_cognito.post("/").mock(
+    mock_api.post("/auth-service/v3/whoop").mock(
         return_value=httpx.Response(200, json={
             "AuthenticationResult": {
                 "AccessToken": "still-bad",
@@ -300,7 +300,7 @@ async def test_backwards_compat_no_context_manager(mock_api, fake_token):
 
 
 @pytest.mark.asyncio
-async def test_context_manager_end_to_end(mock_api, mock_cognito):
+async def test_context_manager_end_to_end(mock_api):
     ts = TokenSet(
         access_token="valid",
         refresh_token="r",

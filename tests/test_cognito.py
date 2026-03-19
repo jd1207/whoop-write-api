@@ -7,8 +7,8 @@ from whoop.exceptions import WhoopAuthError, WhoopAuthExpiredError
 
 
 @pytest.mark.asyncio
-async def test_login_success(mock_cognito):
-    mock_cognito.post("/").mock(
+async def test_login_success(mock_api):
+    mock_api.post("/auth-service/v3/whoop").mock(
         return_value=httpx.Response(200, json={
             "AuthenticationResult": {
                 "AccessToken": "access-123",
@@ -27,8 +27,8 @@ async def test_login_success(mock_cognito):
 
 
 @pytest.mark.asyncio
-async def test_login_bad_credentials(mock_cognito):
-    mock_cognito.post("/").mock(
+async def test_login_bad_credentials(mock_api):
+    mock_api.post("/auth-service/v3/whoop").mock(
         return_value=httpx.Response(400, json={
             "__type": "NotAuthorizedException",
             "message": "Incorrect username or password.",
@@ -40,8 +40,8 @@ async def test_login_bad_credentials(mock_cognito):
 
 
 @pytest.mark.asyncio
-async def test_refresh_success(mock_cognito):
-    mock_cognito.post("/").mock(
+async def test_refresh_success(mock_api):
+    mock_api.post("/auth-service/v3/whoop").mock(
         return_value=httpx.Response(200, json={
             "AuthenticationResult": {
                 "AccessToken": "new-access-789",
@@ -57,8 +57,8 @@ async def test_refresh_success(mock_cognito):
 
 
 @pytest.mark.asyncio
-async def test_refresh_expired(mock_cognito):
-    mock_cognito.post("/").mock(
+async def test_refresh_expired(mock_api):
+    mock_api.post("/auth-service/v3/whoop").mock(
         return_value=httpx.Response(400, json={
             "__type": "NotAuthorizedException",
             "message": "Refresh Token has expired.",
@@ -70,8 +70,8 @@ async def test_refresh_expired(mock_cognito):
 
 
 @pytest.mark.asyncio
-async def test_login_sends_correct_payload(mock_cognito):
-    route = mock_cognito.post("/").mock(
+async def test_login_sends_correct_payload(mock_api):
+    route = mock_api.post("/auth-service/v3/whoop").mock(
         return_value=httpx.Response(200, json={
             "AuthenticationResult": {
                 "AccessToken": "a", "RefreshToken": "r", "ExpiresIn": 3600,
@@ -89,8 +89,8 @@ async def test_login_sends_correct_payload(mock_cognito):
 
 
 @pytest.mark.asyncio
-async def test_custom_client_id(mock_cognito):
-    route = mock_cognito.post("/").mock(
+async def test_custom_client_id(mock_api):
+    route = mock_api.post("/auth-service/v3/whoop").mock(
         return_value=httpx.Response(200, json={
             "AuthenticationResult": {
                 "AccessToken": "a", "RefreshToken": "r", "ExpiresIn": 3600,
@@ -111,8 +111,8 @@ def test_token_set_fields():
 
 
 @pytest.mark.asyncio
-async def test_expires_at_computed_from_time(mock_cognito):
-    mock_cognito.post("/").mock(
+async def test_expires_at_computed_from_time(mock_api):
+    mock_api.post("/auth-service/v3/whoop").mock(
         return_value=httpx.Response(200, json={
             "AuthenticationResult": {
                 "AccessToken": "a", "RefreshToken": "r", "ExpiresIn": 7200,

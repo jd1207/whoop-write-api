@@ -18,36 +18,28 @@ pip install whoop-write-api
 
 ```python
 import asyncio
-from whoop import WhoopClient, WorkoutWrite, ExerciseWrite, SportType
+from whoop import CognitoAuth, WhoopClient, SportType
 
 async def main():
-    client = WhoopClient(token="your-bearer-token")
+    # log in with your whoop email/password (one time)
+    auth = CognitoAuth()
+    tokens = await auth.login("your@email.com", "your-password")
 
-    # read recovery
-    recoveries = await client.get_recovery()
-    print(f"Recovery: {recoveries[0].recovery_score}%")
+    async with WhoopClient(token_set=tokens) as client:
+        # read recovery
+        recoveries = await client.get_recovery()
+        print(f"Recovery: {recoveries[0].recovery_score}%")
 
-    # log a strength workout
-    workout = WorkoutWrite(
-        sport_id=SportType.WEIGHTLIFTING,
-        start="2026-03-16T14:00:00.000Z",
-        end="2026-03-16T15:00:00.000Z",
-        exercises=[
-            ExerciseWrite(name="Bench Press", sets=5, reps=3, weight=235),
-            ExerciseWrite(name="Incline DB Press", sets=3, reps=10, weight=60),
-        ],
-    )
-    result = await client.log_workout(workout)
-    print(f"Logged workout {result.activity_id}")
+        # log a sauna session
+        result = await client.create_activity(
+            "sauna",
+            start="2026-03-18T18:00:00.000Z",
+            end="2026-03-18T18:20:00.000Z",
+        )
+        print(f"Logged sauna {result.id}")
 
-    # log a sauna session (no exercises needed)
-    sauna = WorkoutWrite(
-        sport_id=SportType.SAUNA,
-        start="2026-03-16T18:00:00.000Z",
-        end="2026-03-16T18:20:00.000Z",
-    )
-    result = await client.log_workout(sauna)
-    print(f"Logged sauna {result.activity_id}")
+        # set alarm
+        await client.set_alarm("07:00:00")
 
 asyncio.run(main())
 ```
